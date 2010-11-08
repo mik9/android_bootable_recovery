@@ -498,6 +498,12 @@ void show_partition_menu()
         { "format cache", "CACHE:" },
     };
     
+    string conv_mtds[MTD_COUNT][3] = {
+    	{ "convert system", "SYSTEM:", "rfs|ext2" },
+    	{ "convert data", "DATA:", "rfs|ext2|ext4" },
+    	{ "convert cache", "CACHE:", "rfs|ext2" },
+    };
+
     string mmcs[MMC_COUNT][3] = {
       { "format sdcard", "SDCARD:" },
       { "format sd-ext", "SDEXT:" }  
@@ -510,7 +516,7 @@ void show_partition_menu()
     {
         int ismounted[MOUNTABLE_COUNT];
         int i;
-        static string options[MOUNTABLE_COUNT + MTD_COUNT + MMC_COUNT + 1 + 1]; // mountables, format mtds, format mmcs, usb storage, null
+        static string options[MOUNTABLE_COUNT + MTD_COUNT + MTD_COUNT + MMC_COUNT + 1 + 1]; // mountables, format mtds, format mmcs, usb storage, null
         for (i = 0; i < MOUNTABLE_COUNT; i++)
         {
             ismounted[i] = is_root_path_mounted(mounts[i][2]);
@@ -521,19 +527,24 @@ void show_partition_menu()
         {
             options[MOUNTABLE_COUNT + i] = mtds[i][0];
         }
-            
+
+        for (i = 0; i < MTD_COUNT; i++)
+        {
+            options[MOUNTABLE_COUNT + MTD_COUNT + i] = conv_mtds[i][0];
+        }
+
         for (i = 0; i < MMC_COUNT; i++)
         {
-            options[MOUNTABLE_COUNT + MTD_COUNT + i] = mmcs[i][0];
+            options[MOUNTABLE_COUNT + MTD_COUNT*2 + i] = mmcs[i][0];
         }
     
-        options[MOUNTABLE_COUNT + MTD_COUNT + MMC_COUNT] = "mount USB storage";
-        options[MOUNTABLE_COUNT + MTD_COUNT + MMC_COUNT + 1] = NULL;
+        options[MOUNTABLE_COUNT + MTD_COUNT*2 + MMC_COUNT] = "mount USB storage";
+        options[MOUNTABLE_COUNT + MTD_COUNT*2 + MMC_COUNT + 1] = NULL;
         
         int chosen_item = get_menu_selection(headers, options, 0);
         if (chosen_item == GO_BACK)
             break;
-        if (chosen_item == MOUNTABLE_COUNT + MTD_COUNT + MMC_COUNT)
+        if (chosen_item == MOUNTABLE_COUNT + MTD_COUNT*2 + MMC_COUNT)
         {
             show_mount_usb_storage_menu();
         }
@@ -561,9 +572,12 @@ void show_partition_menu()
             else
                 ui_print("Done.\n");
         }
-        else if (chosen_item < MOUNTABLE_COUNT + MTD_COUNT + MMC_COUNT)
+        else if (chosen_item < MOUNTABLE_COUNT + MTD_COUNT*2)
         {
-            chosen_item = chosen_item - MOUNTABLE_COUNT - MTD_COUNT;
+        }
+        else if (chosen_item < MOUNTABLE_COUNT + MTD_COUNT*2 + MMC_COUNT)
+        {
+            chosen_item = chosen_item - MOUNTABLE_COUNT - MTD_COUNT*2;
             if (!confirm_selection(confirm_format, confirm))
                 continue;
             ui_print("Formatting %s...\n", mmcs[chosen_item][1]);
