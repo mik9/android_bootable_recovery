@@ -473,8 +473,14 @@ format_root_device(const char *root)
     /* Format ext file system
      */
     if (!strncmp(info->filesystem, "ext", 3)) {
-    	LOGW("format_root_device: %s as extX\n", info->device);
-
+    	LOGW("format_root_device: %s as %s\n", info->device, info->filesystem);
+    	char ext_format[96];
+    	sprintf(ext_format, "/xbin/mke2fs -T %s -F -q -m 0 -b 4096 -O ^huge_file,extent %s", info->filesystem, info->device);
+    	if (__system(ext_format) != 0) {
+    		LOGE("format_root_device: Can't run mke2fs [%s]\n", strerror(errno));
+    		return -1;
+    	}
+    	return 0;
     }
 
     return format_non_mtd_device(root);
