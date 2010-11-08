@@ -63,8 +63,8 @@ static const struct { gr_surface* surface; const char *name; } BITMAPS[] = {
     { &gProgressBarIndeterminate[3],    "indeterminate4" },
     { &gProgressBarIndeterminate[4],    "indeterminate5" },
     { &gProgressBarIndeterminate[5],    "indeterminate6" },
-    { &gProgressBarEmpty,               "progress_empty" },
-    { &gProgressBarFill,                "progress_fill" },
+    { &gProgressBarEmpty,               "progress_bar_empty" },
+    { &gProgressBarFill,                "progress_bar_fill" },
     { NULL,                             NULL },
 };
 

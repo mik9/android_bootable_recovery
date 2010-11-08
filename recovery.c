@@ -574,6 +574,8 @@ main(int argc, char **argv) {
 
     ui_init();
     ui_print(EXPAND(RECOVERY_VERSION)"\n");
+    ui_print(" "EXPAND(BASE_RECOVERY_VERSION)"\n");
+    //ui_print(EXPAND(RECOVERY_AUTHOR)"\n");
     get_args(&argc, &argv);
 
     int previous_runs = 0;

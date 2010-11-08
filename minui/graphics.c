@@ -127,7 +127,8 @@ void gr_flip(void)
     GGLContext *gl = gr_context;
 
     /* swap front and back buffers */
-    gr_active_fb = (gr_active_fb + 1) & 1;
+    // disable two buffers
+    // gr_active_fb = (gr_active_fb + 1) & 1;
 
     /* copy data from the in-memory surface to the buffer we're about
      * to make active. */
