@@ -42,7 +42,7 @@
 #endif
 
 #ifndef DATA_FILESYSTEM
-#define DATA_FILESYSTEM "auto"
+#define DATA_FILESYSTEM "unknown"
 #endif
 
 #ifndef DATADATA_DEVICE
@@ -58,7 +58,7 @@
 #endif
 
 #ifndef CACHE_FILESYSTEM
-#define CACHE_FILESYSTEM "auto"
+#define CACHE_FILESYSTEM "unknown"
 #endif
 
 #ifndef SYSTEM_DEVICE
@@ -66,7 +66,7 @@
 #endif
 
 #ifndef SYSTEM_FILESYSTEM
-#define SYSTEM_FILESYSTEM "auto"
+#define SYSTEM_FILESYSTEM "unknown"
 #endif
 
 #ifndef DATA_FILESYSTEM_OPTIONS
@@ -135,5 +135,15 @@ typedef struct {
     const char *filesystem;
     const char *filesystem_options;
 } RootInfo;
+
+/* Filesystem options (for multisystem support /system, /data, /cache)
+ */
+int detect_internal_fs(const char *root_path);
+const char* get_type_internal_fs(const char *root_path);
+
+typedef struct {
+	const char* filesystem;
+	const char* filesystem_options;
+} FilesystemOptions;
 
 #endif  // RECOVERY_ROOTS_H_

@@ -33,6 +33,16 @@
 
 #include "extendedcommands.h"
 
+/*
+ * filesystems & mount options
+ */
+static const FilesystemOptions g_fs_options[] = {
+		{ "rfs",  "nodev,codepage=utf8,xattr,check=no" },
+		{ "ext2", "noatime,nodiratime,nodev" },
+		{ "ext4", "noatime,nodiratime,nodev" },
+};
+#define NUM_FSYSTEMS (sizeof(g_fs_options) / sizeof(g_fs_options[0]))
+
 /* Canonical pointers.
 xxx may just want to use enums
  */
@@ -42,11 +52,11 @@ static const char g_raw[] = "@\0g_raw";
 static const char g_package_file[] = "@\0g_package_file";
 
 static RootInfo g_roots[] = {
-    { "BOOT:", g_mtd_device, NULL, "boot", NULL, g_raw, NULL },
     { "CACHE:", CACHE_DEVICE, NULL, "cache", "/cache", CACHE_FILESYSTEM, CACHE_FILESYSTEM_OPTIONS },
     { "DATA:", DATA_DEVICE, NULL, "userdata", "/data", DATA_FILESYSTEM, DATA_FILESYSTEM_OPTIONS },
     { "SYSTEM:", SYSTEM_DEVICE, NULL, "system", "/system", SYSTEM_FILESYSTEM, SYSTEM_FILESYSTEM_OPTIONS },
     { "PACKAGE:", NULL, NULL, NULL, NULL, g_package_file, NULL },
+    { "BOOT:", g_mtd_device, NULL, "boot", NULL, g_raw, NULL },
     { "RECOVERY:", g_mtd_device, NULL, "recovery", "/", g_raw, NULL },
     { "SDCARD:", SDCARD_DEVICE_PRIMARY, SDCARD_DEVICE_SECONDARY, NULL, "/sdcard", "vfat", NULL },
     { "SDEXT:", SDEXT_DEVICE, NULL, NULL, "/sd-ext", SDEXT_FILESYSTEM, NULL },
@@ -217,6 +227,56 @@ static int mount_internal(const char* device, const char* mount_point, const cha
         sprintf(mount_cmd, "mount -t %s -o%s %s %s", filesystem, options, device, mount_point);
         return __system(mount_cmd);
     }
+}
+
+const char* get_type_internal_fs(const char *root_path)
+{
+    const RootInfo *info = get_root_info_for_path(root_path);
+    if (info == NULL || info->device == NULL) {
+        LOGW("get_type_internal_fs: can't resolve \"%s\"\n", root_path);
+        return "error";
+    }
+    return info->filesystem;
+}
+
+int detect_internal_fs(const char *root_path)
+{
+    RootInfo *info = get_root_info_for_path(root_path);
+    if (info == NULL || info->device == NULL) {
+        LOGW("detect_internal_fs: can't resolve \"%s\"\n", root_path);
+        return -1;
+    }
+
+    /* Don't try to unmount a mounted device.
+     */
+    int ret = ensure_root_path_unmounted(root_path);
+    if (ret < 0) {
+    	LOGW("detect_internal_fs: can't unmount \"%s\"\n", root_path);
+    	return ret;
+    }
+
+    /* Consistently try to mount for different types of file systems.
+     */
+    int i;
+    for (i=0; i<NUM_FSYSTEMS; i++) {
+    	LOGW("detect_internal_fs: Try to mount: %s as %s (%s) - ", root_path, g_fs_options[i].filesystem, g_fs_options[i].filesystem_options);
+    	if (mount_internal(info->device, info->mount_point, g_fs_options[i].filesystem, g_fs_options[i].filesystem_options) == 0) {
+    		LOGW("success\n");
+    		/* success
+    		 * set type of fs & options for root_path
+    		 */
+    		info->filesystem = g_fs_options[i].filesystem;
+    		info->filesystem_options = g_fs_options[i].filesystem_options;
+
+    		// unmount partition
+    		ensure_root_path_unmounted(root_path);
+    		return 0;
+    	}
+    	else
+    		LOGW("can't\n");
+    }
+    // can't determine
+    return -1;
 }
 
 int

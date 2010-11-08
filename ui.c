@@ -461,13 +461,17 @@ void ui_print(const char *fmt, ...)
     if (text_rows > 0 && text_cols > 0) {
         char *ptr;
         for (ptr = buf; *ptr != '\0'; ++ptr) {
+        	if (*ptr == '\r') {
+        		text_col = 0;
+        		text[text_row][text_col] = '\0';
+        	}
             if (*ptr == '\n' || text_col >= text_cols) {
                 text[text_row][text_col] = '\0';
                 text_col = 0;
                 text_row = (text_row + 1) % text_rows;
                 if (text_row == text_top) text_top = (text_top + 1) % text_rows;
             }
-            if (*ptr != '\n') text[text_row][text_col++] = *ptr;
+            if (*ptr != '\n' && *ptr != '\r') text[text_row][text_col++] = *ptr;
         }
         text[text_row][text_col] = '\0';
         update_screen_locked();
