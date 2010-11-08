@@ -19,6 +19,31 @@
 
 #include <stdio.h>
 
+// redefine default keys for Samsung Spica i5700
+#undef KEY_HOME
+#define KEY_HOME 			227
+#undef KEY_END
+#define KEY_END 			249
+#undef KEY_VOLUMEDOWN
+#define KEY_VOLUMEDOWN 		209
+#undef KEY_VOLUMEUP
+#define KEY_VOLUMEUP 		201
+#undef KEY_MENU
+#define KEY_MENU 			211
+#undef KEY_BACK
+#define KEY_BACK 			212
+#undef KEY_CAMERA
+#define KEY_CAMERA 			250
+#undef BTN_MOUSE
+#define BTN_MOUSE 			272
+#undef KEY_DOWN
+#define KEY_DOWN 			210
+#undef KEY_UP
+#define KEY_UP 				202
+#undef KEY_SEND
+#define KEY_SEND 			204
+
+
 // Initialize the graphics system.
 void ui_init();
 
