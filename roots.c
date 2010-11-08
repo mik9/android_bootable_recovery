@@ -45,15 +45,12 @@ static RootInfo g_roots[] = {
     { "BOOT:", g_mtd_device, NULL, "boot", NULL, g_raw, NULL },
     { "CACHE:", CACHE_DEVICE, NULL, "cache", "/cache", CACHE_FILESYSTEM, CACHE_FILESYSTEM_OPTIONS },
     { "DATA:", DATA_DEVICE, NULL, "userdata", "/data", DATA_FILESYSTEM, DATA_FILESYSTEM_OPTIONS },
-#ifdef HAS_DATADATA
-    { "DATADATA:", DATADATA_DEVICE, NULL, "datadata", "/datadata", DATADATA_FILESYSTEM, DATADATA_FILESYSTEM_OPTIONS },
-#endif
-    { "MISC:", g_mtd_device, NULL, "misc", NULL, g_raw, NULL },
+    { "SYSTEM:", SYSTEM_DEVICE, NULL, "system", "/system", SYSTEM_FILESYSTEM, SYSTEM_FILESYSTEM_OPTIONS },
+
     { "PACKAGE:", NULL, NULL, NULL, NULL, g_package_file, NULL },
     { "RECOVERY:", g_mtd_device, NULL, "recovery", "/", g_raw, NULL },
     { "SDCARD:", SDCARD_DEVICE_PRIMARY, SDCARD_DEVICE_SECONDARY, NULL, "/sdcard", "vfat", NULL },
     { "SDEXT:", SDEXT_DEVICE, NULL, NULL, "/sd-ext", SDEXT_FILESYSTEM, NULL },
-    { "SYSTEM:", SYSTEM_DEVICE, NULL, "system", "/system", SYSTEM_FILESYSTEM, SYSTEM_FILESYSTEM_OPTIONS },
     { "MBM:", g_mtd_device, NULL, "mbm", NULL, g_raw, NULL },
     { "TMP:", NULL, NULL, NULL, "/tmp", NULL, NULL },
 };

@@ -38,11 +38,11 @@
 #endif
 
 #ifndef DATA_DEVICE
-#define DATA_DEVICE g_mtd_device
+#define DATA_DEVICE "/dev/stl5"
 #endif
 
 #ifndef DATA_FILESYSTEM
-#define DATA_FILESYSTEM "yaffs2"
+#define DATA_FILESYSTEM "auto"
 #endif
 
 #ifndef DATADATA_DEVICE
@@ -54,19 +54,19 @@
 #endif
 
 #ifndef CACHE_DEVICE
-#define CACHE_DEVICE g_mtd_device
+#define CACHE_DEVICE "/dev/stl7"
 #endif
 
 #ifndef CACHE_FILESYSTEM
-#define CACHE_FILESYSTEM "yaffs2"
+#define CACHE_FILESYSTEM "auto"
 #endif
 
 #ifndef SYSTEM_DEVICE
-#define SYSTEM_DEVICE g_mtd_device
+#define SYSTEM_DEVICE "/dev/stl6"
 #endif
 
 #ifndef SYSTEM_FILESYSTEM
-#define SYSTEM_FILESYSTEM "yaffs2"
+#define SYSTEM_FILESYSTEM "auto"
 #endif
 
 #ifndef DATA_FILESYSTEM_OPTIONS
