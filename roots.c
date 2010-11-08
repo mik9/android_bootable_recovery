@@ -461,9 +461,13 @@ format_root_device(const char *root)
      */
     if (!strcmp(info->filesystem, "rfs")) {
     	LOGW("format_root_device: %s as rfs\n", info->device);
-    	char* args[] = {"/xbin/stl.format", info->device, NULL};
-    	execv("/xbin/stl.format", args);
-    	LOGE("format_root_device: Can't run STL format [%s]\n", strerror(errno));
+    	char stl_format[32] = "/xbin/stl.format ";
+    	strcat(stl_format, info->device);
+    	if (__system(stl_format) != 0) {
+    		LOGE("format_root_device: Can't run STL format [%s]\n", strerror(errno));
+    		return -1;
+    	}
+    	return 0;
     }
 
     /* Format ext file system

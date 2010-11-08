@@ -542,7 +542,7 @@ detect_root_fs() {
 	ui_print("\r Filesystems:\n");
 	ui_print("  system: %s\n", get_type_internal_fs("SYSTEM:"));
 	ui_print("    data: %s\n", get_type_internal_fs("DATA:"));
-	ui_print("   cache: %s\n", get_type_internal_fs("CACHE:"));
+	ui_print("   cache: %s\n\n", get_type_internal_fs("CACHE:"));
 }
 
 static void
