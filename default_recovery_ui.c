@@ -27,7 +27,7 @@ char* MENU_ITEMS[] = { "reboot system now",
                        "wipe data/factory reset",
                        "wipe cache partition",
                        "backup and restore",
-                       "mounts and storage",
+                       "mounts / format / convert",
                        "advanced",
                        NULL };
 
