@@ -487,6 +487,7 @@ void ui_reset_text_col()
 }
 
 #define MENU_ITEM_HEADER " - "
+#define MENU_ITEM_HEADER_DIV "   "
 #define MENU_ITEM_HEADER_LENGTH strlen(MENU_ITEM_HEADER)
 
 int ui_start_menu(char** headers, char** items) {
@@ -501,7 +502,11 @@ int ui_start_menu(char** headers, char** items) {
         menu_top = i;
         for (; i < MENU_MAX_ROWS; ++i) {
             if (items[i-menu_top] == NULL) break;
-            strcpy(menu[i], MENU_ITEM_HEADER);
+            if (items[i-menu_top][0] != 0)
+            	strcpy(menu[i], MENU_ITEM_HEADER);
+            else
+            	strcpy(menu[i], MENU_ITEM_HEADER_DIV);
+
             strncpy(menu[i] + MENU_ITEM_HEADER_LENGTH, items[i-menu_top], text_cols-1 - MENU_ITEM_HEADER_LENGTH);
             menu[i][text_cols-1] = '\0';
         }
@@ -530,6 +535,8 @@ int ui_menu_select(int sel) {
         old_sel = menu_sel;
         menu_sel = sel;
 
+        int sel_direction = (sel > old_sel);
+
         if (menu_sel < 0) menu_sel = menu_items + menu_sel;
         if (menu_sel >= menu_items) menu_sel = menu_sel - menu_items;
 
@@ -541,6 +548,8 @@ int ui_menu_select(int sel) {
         if (menu_sel - menu_show_start + menu_top >= text_rows) {
             menu_show_start = menu_sel + menu_top - text_rows + 1;
         }
+
+        if (menu[menu_top+menu_sel][1] != '-') menu_sel += sel_direction?1:-1;
 
         sel = menu_sel;
 

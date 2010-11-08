@@ -472,9 +472,18 @@ int format_non_mtd_device(const char* root)
     return 0;
 }
 
-#define MOUNTABLE_COUNT 5
-#define MTD_COUNT 3
-#define MMC_COUNT 2
+int convert_mtd_device(const char *root, const char* fs_list)
+{
+    static char* headers[] = {  "Converting Menu",
+                                "",
+                                NULL
+    };
+	return 1;
+}
+
+#define MOUNTABLE_COUNT 6
+#define MTD_COUNT 4
+#define MMC_COUNT 3
 
 void show_partition_menu()
 {
@@ -489,24 +498,28 @@ void show_partition_menu()
         { "mount /data", "unmount /data", "DATA:" },
         { "mount /cache", "unmount /cache", "CACHE:" },
         { "mount /sdcard", "unmount /sdcard", "SDCARD:" },
-        { "mount /sd-ext", "unmount /sd-ext", "SDEXT:" }
+        { "mount /sd-ext", "unmount /sd-ext", "SDEXT:" },
+        { "", "", "" },
         };
         
     string mtds[MTD_COUNT][2] = {
         { "format system", "SYSTEM:" },
         { "format data", "DATA:" },
         { "format cache", "CACHE:" },
+        { "", "" },
     };
     
     string conv_mtds[MTD_COUNT][3] = {
-    	{ "convert system", "SYSTEM:", "rfs|ext2" },
-    	{ "convert data", "DATA:", "rfs|ext2|ext4" },
-    	{ "convert cache", "CACHE:", "rfs|ext2" },
+    	{ "convert system", "SYSTEM:", "r2" },
+    	{ "convert data", "DATA:", "r24" },
+    	{ "convert cache", "CACHE:", "r2" },
+    	{ "", "", "" },
     };
 
     string mmcs[MMC_COUNT][3] = {
       { "format sdcard", "SDCARD:" },
-      { "format sd-ext", "SDEXT:" }  
+      { "format sd-ext", "SDEXT:" },
+      { "", "" },
     };
     
     static char* confirm_format  = "Confirm format?";
@@ -574,6 +587,11 @@ void show_partition_menu()
         }
         else if (chosen_item < MOUNTABLE_COUNT + MTD_COUNT*2)
         {
+            chosen_item = chosen_item - MOUNTABLE_COUNT - MTD_COUNT;
+            if (0 != convert_mtd_device(conv_mtds[chosen_item][1], conv_mtds[chosen_item][2]))
+                ui_print("Error converting %s!\n", mtds[chosen_item][1]);
+            else
+                ui_print("Done.\n");
         }
         else if (chosen_item < MOUNTABLE_COUNT + MTD_COUNT*2 + MMC_COUNT)
         {
