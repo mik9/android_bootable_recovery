@@ -448,7 +448,6 @@ wipe_data(int confirm) {
     erase_root("DATADATA:");
 #endif
     erase_root("CACHE:");
-    erase_root("SDEXT:");
     erase_root("SDCARD:/.android_secure");
     ui_print("Data wipe complete.\n");
 }
