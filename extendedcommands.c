@@ -473,7 +473,7 @@ int format_non_mtd_device(const char* root)
 }
 
 #define MOUNTABLE_COUNT 5
-#define MTD_COUNT 4
+#define MTD_COUNT 3
 #define MMC_COUNT 2
 
 void show_partition_menu()
@@ -493,7 +493,6 @@ void show_partition_menu()
         };
         
     string mtds[MTD_COUNT][2] = {
-        { "format boot", "BOOT:" },
         { "format system", "SYSTEM:" },
         { "format data", "DATA:" },
         { "format cache", "CACHE:" },
