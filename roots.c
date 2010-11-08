@@ -272,8 +272,6 @@ int detect_internal_fs(const char *root_path)
     		ensure_root_path_unmounted(root_path);
     		return 0;
     	}
-    	else
-    		LOGW("can't\n");
     }
     // can't determine
     return -1;
@@ -444,7 +442,7 @@ format_root_device(const char *root)
     }
 
     //Handle MMC device types
-    if(info->device == g_mmc_device) {
+    if (info->device == g_mmc_device) {
         mmc_scan_partitions();
         const MmcPartition *partition;
         partition = mmc_find_partition_by_name(info->partition_name);
@@ -457,6 +455,22 @@ format_root_device(const char *root)
             if(mmc_format_ext3(partition))
                 LOGE("\n\"%s\" wipe failed!\n", info->partition_name);
         }
+    }
+
+    /* Format rfs filesystem
+     */
+    if (!strcmp(info->filesystem, "rfs")) {
+    	LOGW("format_root_device: %s as rfs\n", info->device);
+    	char* args[] = {"/xbin/stl.format", info->device, NULL};
+    	execv("/xbin/stl.format", args);
+    	LOGE("format_root_device: Can't run STL format [%s]\n", strerror(errno));
+    }
+
+    /* Format ext file system
+     */
+    if (!strncmp(info->filesystem, "ext", 3)) {
+    	LOGW("format_root_device: %s as extX\n", info->device);
+
     }
 
     return format_non_mtd_device(root);

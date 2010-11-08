@@ -338,7 +338,7 @@ extern char **environ;
 int
 __system(const char *command)
 {
-  pid_t pid;
+	pid_t pid;
     sig_t intsave, quitsave;
     sigset_t mask, omask;
     int pstat;
@@ -359,8 +359,8 @@ __system(const char *command)
     case 0:                /* child */
         sigprocmask(SIG_SETMASK, &omask, NULL);
         execve(_PATH_BSHELL, argp, environ);
-    _exit(127);
-  }
+        _exit(127);
+    }
 
     intsave = (sig_t)  bsd_signal(SIGINT, SIG_IGN);
     quitsave = (sig_t) bsd_signal(SIGQUIT, SIG_IGN);
