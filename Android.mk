@@ -44,8 +44,8 @@ LOCAL_MODULE := recovery
 
 LOCAL_FORCE_STATIC_EXECUTABLE := true
 
-RECOVERY_VERSION := YA Spica Recovery v0.1.3
-RECOVERY_AUTHOR := LeshaK / Xmister  & Samdroid.Net
+RECOVERY_VERSION := Samdroid.Net Recovery v0.1.3
+RECOVERY_AUTHOR := LeshaK / Xmister & Samdroid.Net
 BASE_RECOVERY_VERSION := based on ClockworkMod v2.5.1.1
 
 LOCAL_CFLAGS += -DRECOVERY_VERSION="$(RECOVERY_VERSION)"
