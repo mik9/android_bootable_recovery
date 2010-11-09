@@ -534,7 +534,7 @@ prompt_and_wait() {
 
 void
 detect_root_fs() {
-	ui_print("\nDetecting filesystems");
+	ui_print("Detecting filesystems");
 	detect_internal_fs("SYSTEM:"); ui_print(".");
 	detect_internal_fs("DATA:"); ui_print(".");
 	detect_internal_fs("CACHE:"); ui_print(".");
@@ -542,7 +542,7 @@ detect_root_fs() {
 	ui_print("\r Filesystems:\n");
 	ui_print("  system: %s\n", get_type_internal_fs("SYSTEM:"));
 	ui_print("    data: %s\n", get_type_internal_fs("DATA:"));
-	ui_print("   cache: %s\n\n", get_type_internal_fs("CACHE:"));
+	ui_print("   cache: %s\n", get_type_internal_fs("CACHE:"));
 }
 
 static void
@@ -587,11 +587,12 @@ main(int argc, char **argv) {
 
     ui_init();
     ui_print(EXPAND(RECOVERY_VERSION)"\n");
-    ui_print(" "EXPAND(BASE_RECOVERY_VERSION)"\n");
+    ui_print(" "EXPAND(BASE_RECOVERY_VERSION)"\n\n");
     //ui_print(EXPAND(RECOVERY_AUTHOR)"\n");
 
     // Detect filesystem of /system, /data, /cache
     detect_root_fs();
+    ui_print("\n");
 
     get_args(&argc, &argv);
 

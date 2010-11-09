@@ -63,8 +63,8 @@ static const struct { gr_surface* surface; const char *name; } BITMAPS[] = {
     { &gProgressBarIndeterminate[3],    "indeterminate4" },
     { &gProgressBarIndeterminate[4],    "indeterminate5" },
     { &gProgressBarIndeterminate[5],    "indeterminate6" },
-    { &gProgressBarEmpty,               "progress_bar_empty" },
-    { &gProgressBarFill,                "progress_bar_fill" },
+    { &gProgressBarEmpty,               "progress_empty" },
+    { &gProgressBarFill,                "progress_fill" },
     { NULL,                             NULL },
 };
 
@@ -391,6 +391,14 @@ void ui_set_background(int icon)
 {
     pthread_mutex_lock(&gUpdateMutex);
     gCurrentIcon = gBackgroundIcon[icon];
+    update_screen_locked();
+    pthread_mutex_unlock(&gUpdateMutex);
+}
+
+void ui_clear_backgroud()
+{
+    pthread_mutex_lock(&gUpdateMutex);
+    gCurrentIcon = NULL;
     update_screen_locked();
     pthread_mutex_unlock(&gUpdateMutex);
 }

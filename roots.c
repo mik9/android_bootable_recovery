@@ -229,6 +229,20 @@ static int mount_internal(const char* device, const char* mount_point, const cha
     }
 }
 
+int set_type_internal_fs(const char *root_path, const char* new_fs)
+{
+	RootInfo *info = get_root_info_for_path(root_path);
+	int i;
+	for (i=0; i<NUM_FSYSTEMS; i++) {
+		if (!strcmp(new_fs, g_fs_options[i].filesystem)) {
+    		info->filesystem = g_fs_options[i].filesystem;
+    		info->filesystem_options = g_fs_options[i].filesystem_options;
+    		return 0;
+		}
+	}
+	return -1;
+}
+
 const char* get_type_internal_fs(const char *root_path)
 {
     const RootInfo *info = get_root_info_for_path(root_path);
@@ -237,6 +251,16 @@ const char* get_type_internal_fs(const char *root_path)
         return "error";
     }
     return info->filesystem;
+}
+
+const char* get_mount_point_for_root(const char *root_path)
+{
+	const RootInfo *info = get_root_info_for_path(root_path);
+    if (info == NULL || info->device == NULL) {
+        LOGW("get_mount_point_for_root: can't resolve \"%s\"\n", root_path);
+        return NULL;
+    }
+    return info->mount_point;
 }
 
 int detect_internal_fs(const char *root_path)

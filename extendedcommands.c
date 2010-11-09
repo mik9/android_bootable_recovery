@@ -16,6 +16,7 @@
 #include <sys/limits.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <sys/statfs.h>
 
 #include <signal.h>
 #include <sys/wait.h>
@@ -472,13 +473,172 @@ int format_non_mtd_device(const char* root)
     return 0;
 }
 
+#define NUM_FILESYSTEMS 3
+
 int convert_mtd_device(const char *root, const char* fs_list)
 {
     static char* headers[] = {  "Converting Menu",
                                 "",
+    							NULL,
                                 NULL
     };
-	return 1;
+
+    static char* confirm_convert  = "Confirm convert?";
+    static char* confirm = "Yes - Convert";
+
+    const char* root_fs = get_type_internal_fs(root);
+    headers[2] = root;
+
+    typedef char* string;
+    string tfs[NUM_FILESYSTEMS] = { "rfs", "ext2", "ext4" };
+    static string options[NUM_FILESYSTEMS*2 + 1 + 1];
+    int sel_fs[NUM_FILESYSTEMS*2 + 1 + 1];
+
+	int i,j=0;
+	// with backup
+	for (i=0; i<NUM_FILESYSTEMS; i++) {
+    	if (fs_list[i] == '*') {
+    		if (strcmp(tfs[i], root_fs)) {
+    			sel_fs[j] = i;
+    			options[j] = (string)malloc(32);
+    			sprintf(options[j++], "to %s with backup", tfs[i]);
+    		}
+    	}
+    	else break;
+    }
+    options[j++] = "";
+
+	// without backup
+	for (i=0; i<NUM_FILESYSTEMS; i++) {
+    	if (fs_list[i] == '*') {
+    		if (strcmp(tfs[i], root_fs)) {
+    			sel_fs[j] = i;
+    			options[j] = (string)malloc(32);
+    			sprintf(options[j++], "to %s through format", tfs[i]);
+    		}
+    	}
+    	else break;
+    }
+    options[j] = NULL;
+
+    int chosen_item = get_menu_selection(headers, options, 0);
+    if (chosen_item == GO_BACK)
+        return 1;
+
+    if (chosen_item < i) {
+        ui_set_background(BACKGROUND_ICON_INSTALLING);
+        ui_show_indeterminate_progress();
+
+        // with backup
+    	// mount $root
+    	if (0 != ensure_root_path_mounted(root)) {
+    		ui_print("Can't mount %s for backup\n", root);
+    		return -1;
+    	}
+
+    	// check size of $root
+    	struct statfs stat_root;
+    	if (0 != statfs(get_mount_point_for_root(root), &stat_root)) {
+    		ui_print("Can't get size of %s\n", root);
+    		return -1;
+    	}
+
+    	// mount SDCARD
+    	if (0 != ensure_root_path_mounted("SDCARD:")) {
+    		ui_print("Can't mount sdcard for backup\n", root);
+    		return -1;
+    	}
+
+    	// check size SD
+    	struct statfs stat_sd;
+    	if (0 != statfs(get_mount_point_for_root("SDCARD:"), &stat_sd)) {
+    		ui_print("Can't get size of sdcard\n");
+    		return -1;
+    	}
+
+        uint64_t root_fsize = (uint64_t)(stat_root.f_blocks-stat_root.f_bfree)*(uint64_t)stat_root.f_bsize;
+        uint64_t sd_free_size = (uint64_t)stat_sd.f_bfree*(uint64_t)stat_sd.f_bsize;
+        ui_print("SDcard free: %lluMB\n", sd_free_size/(1024*1024));
+        if (root_fsize > sd_free_size) {
+        	ui_print("Can't backup need: %lluMB on SD\n", root_fsize/(1024*1024));
+        	return -1;
+        }
+
+    	// create folder for backup [/sdcard/samdroid/tmp] [mkdir -p /sdcard/samdroid/tmp]
+    	if (0 != __system("mkdir -p /sdcard/samdroid/tmp")) {
+    		ui_print("Can't create tmp folder for backup\n");
+    		return -1;
+    	}
+
+        ui_show_progress(0.2, 45);
+
+    	// backup find + cpio [find /system -depth -type f \( -iname "*" ! -iname "*RFS_LOG.*" \) | cpio -o -H newc -F /sdcard/samdroid/tmp/ctmp.cpio]
+    	ui_print("Backuping %s...\n", root);
+    	char br_exec[256];
+    	sprintf(br_exec, "/xbin/find %s -depth -type f \\( -iname \"*\" ! -iname \"*RFS_LOG.*\" \\) | /xbin/cpio -o -H newc -F /sdcard/samdroid/tmp/ctmp.cpio", get_mount_point_for_root(root));
+    	if (0 != __system(br_exec)) {
+    		ui_print("Can't create backup file\n");
+    		return -1;
+    	}
+
+    	// check size of backup file > sizeof($root)?
+    	// set new FS
+    	ui_print("Change fs type %s -> %s\n", get_type_internal_fs(root), tfs[sel_fs[chosen_item]]);
+    	if (0 != set_type_internal_fs(root, tfs[sel_fs[chosen_item]])) {
+    		ui_print("Error change type of file system to %s for %s\n", tfs[sel_fs[chosen_item]], root);
+    		return -1;
+    	}
+
+    	// format $root
+        ui_print("Formatting %s...\n", root);
+        ui_show_indeterminate_progress();
+        if (0 != format_root_device(root)) {
+    		ui_print("Error format %s\n", root);
+    		return -1;
+        }
+
+        // mount $root
+    	if (0 != ensure_root_path_mounted(root)) {
+    		ui_print("Can't mount %s for backup\n", root);
+    		return -1;
+    	}
+
+    	// restore $root
+        ui_show_progress(0.8, 500);
+    	ui_print("Restoring %s...\n", root);
+    	if (0 != __system("/xbin/cpio -id -F /sdcard/samdroid/tmp/ctmp.cpio")) {
+    		ui_print("Can't restore backup file\n");
+    		return -1;
+    	}
+
+    	// check size of $root ?
+    	// delete temp backup files (delete tmp folder)
+        ui_show_indeterminate_progress();
+    	if (0 != __system("/xbin/rm /sdcard/samdroid/tmp/ctmp.cpio")) {
+    		ui_print("Can't remove backup file\n");
+    		return -1;
+    	}
+
+        return 0;
+    }
+    else {
+    	// without
+        if (!confirm_selection(confirm_convert, confirm))
+            return 1;
+    	// change file system to new
+    	ui_print("Change fs type %s -> %s\n", get_type_internal_fs(root), tfs[sel_fs[chosen_item]]);
+    	if (0 != set_type_internal_fs(root, tfs[sel_fs[chosen_item]])) {
+    		ui_print("Error change type of file system to %s for %s\n", tfs[sel_fs[chosen_item]], root);
+    		return -1;
+    	}
+    	// format
+        ui_set_background(BACKGROUND_ICON_INSTALLING);
+        ui_show_indeterminate_progress();
+        ui_print("Formatting %s...\n", root);
+        return format_root_device(root);
+    }
+
+    return -1;
 }
 
 #define MOUNTABLE_COUNT 6
@@ -510,9 +670,9 @@ void show_partition_menu()
     };
     
     string conv_mtds[MTD_COUNT][3] = {
-    	{ "convert system", "SYSTEM:", "r2" },
-    	{ "convert data", "DATA:", "r24" },
-    	{ "convert cache", "CACHE:", "r2" },
+    	{ "convert system", "SYSTEM:", "**" },
+    	{ "convert data", "DATA:", "***" },
+    	{ "convert cache", "CACHE:", "**" },
     	{ "", "", "" },
     };
 
@@ -529,7 +689,7 @@ void show_partition_menu()
     {
         int ismounted[MOUNTABLE_COUNT];
         int i;
-        static string options[MOUNTABLE_COUNT + MTD_COUNT + MTD_COUNT + MMC_COUNT + 1 + 1]; // mountables, format mtds, format mmcs, usb storage, null
+        static string options[MOUNTABLE_COUNT + MTD_COUNT + MTD_COUNT + MMC_COUNT + 1 + 1]; // mountables, format mtds, convet mtds, format mmcs, usb storage, null
         for (i = 0; i < MOUNTABLE_COUNT; i++)
         {
             ismounted[i] = is_root_path_mounted(mounts[i][2]);
@@ -588,10 +748,12 @@ void show_partition_menu()
         else if (chosen_item < MOUNTABLE_COUNT + MTD_COUNT*2)
         {
             chosen_item = chosen_item - MOUNTABLE_COUNT - MTD_COUNT;
-            if (0 != convert_mtd_device(conv_mtds[chosen_item][1], conv_mtds[chosen_item][2]))
-                ui_print("Error converting %s!\n", mtds[chosen_item][1]);
-            else
-                ui_print("Done.\n");
+            if (0 == convert_mtd_device(conv_mtds[chosen_item][1], conv_mtds[chosen_item][2])) {
+            	ui_print("Done.\n");
+            	detect_root_fs();
+            }
+            ui_clear_backgroud();
+            ui_reset_progress();
         }
         else if (chosen_item < MOUNTABLE_COUNT + MTD_COUNT*2 + MMC_COUNT)
         {
