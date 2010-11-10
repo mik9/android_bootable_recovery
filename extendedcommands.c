@@ -526,10 +526,13 @@ int convert_mtd_device(const char *root, const char* fs_list)
         return 1;
 
     if (chosen_item < i) {
-        ui_set_background(BACKGROUND_ICON_INSTALLING);
+        // with backup
+        if (!confirm_selection(confirm_convert, confirm))
+            return 1;
+
+    	ui_set_background(BACKGROUND_ICON_INSTALLING);
         ui_show_indeterminate_progress();
 
-        // with backup
     	// mount $root
     	if (0 != ensure_root_path_mounted(root)) {
     		ui_print("Can't mount %s for backup\n", root);
