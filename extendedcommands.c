@@ -561,7 +561,7 @@ int convert_mtd_device(const char *root, const char* fs_list)
 
         uint64_t root_fsize = (uint64_t)(stat_root.f_blocks-stat_root.f_bfree)*(uint64_t)stat_root.f_bsize;
         uint64_t sd_free_size = (uint64_t)stat_sd.f_bfree*(uint64_t)stat_sd.f_bsize;
-        ui_print("SDcard free: %lluMB\n", sd_free_size/(1024*1024));
+        ui_print("SD free: %lluMB / need: %lluMB\n", sd_free_size/(1024*1024), root_fsize/(1024*1024));
         if (root_fsize > sd_free_size) {
         	ui_print("Can't backup need: %lluMB on SD\n", root_fsize/(1024*1024));
         	return -1;
@@ -575,10 +575,10 @@ int convert_mtd_device(const char *root, const char* fs_list)
 
         ui_show_progress(0.2, 45);
 
-    	// backup find + cpio [find /system -depth -type f \( -iname "*" ! -iname "*RFS_LOG.*" \) | cpio -o -H newc -F /sdcard/samdroid/tmp/ctmp.cpio]
+    	// backup
     	ui_print("Backuping %s...\n", root);
     	char br_exec[256];
-    	sprintf(br_exec, "/xbin/find %s -depth -type f \\( -iname \"*\" ! -iname \"*RFS_LOG.*\" \\) | /xbin/cpio -o -H newc -F /sdcard/samdroid/tmp/ctmp.cpio", get_mount_point_for_root(root));
+    	sprintf(br_exec, "tar -c --exclude=*RFS_LOG.LO* -f /sdcard/samdroid/tmp/ctmp.tar %s", get_mount_point_for_root(root)+1);
     	if (0 != __system(br_exec)) {
     		ui_print("Can't create backup file\n");
     		return -1;
@@ -609,7 +609,7 @@ int convert_mtd_device(const char *root, const char* fs_list)
     	// restore $root
         ui_show_progress(0.8, 500);
     	ui_print("Restoring %s...\n", root);
-    	if (0 != __system("/xbin/cpio -id -F /sdcard/samdroid/tmp/ctmp.cpio")) {
+    	if (0 != __system("tar -x -f /sdcard/samdroid/tmp/ctmp.tar")) {
     		ui_print("Can't restore backup file\n");
     		return -1;
     	}
@@ -617,7 +617,7 @@ int convert_mtd_device(const char *root, const char* fs_list)
     	// check size of $root ?
     	// delete temp backup files (delete tmp folder)
         ui_show_indeterminate_progress();
-    	if (0 != __system("/xbin/rm /sdcard/samdroid/tmp/ctmp.cpio")) {
+    	if (0 != __system("/xbin/rm /sdcard/samdroid/tmp/ctmp.tar")) {
     		ui_print("Can't remove backup file\n");
     		return -1;
     	}
