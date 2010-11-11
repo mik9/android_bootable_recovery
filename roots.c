@@ -485,7 +485,7 @@ format_root_device(const char *root)
      */
     if (!strcmp(info->filesystem, "rfs")) {
     	LOGW("format_root_device: %s as rfs\n", info->device);
-    	char stl_format[32] = "/xbin/stl.format ";
+    	char stl_format[32] = "stl.format ";
     	strcat(stl_format, info->device);
     	if (__system(stl_format) != 0) {
     		LOGE("format_root_device: Can't run STL format [%s]\n", strerror(errno));
@@ -499,7 +499,7 @@ format_root_device(const char *root)
     if (!strncmp(info->filesystem, "ext", 3)) {
     	LOGW("format_root_device: %s as %s\n", info->device, info->filesystem);
     	char ext_format[96];
-    	sprintf(ext_format, "/xbin/mke2fs -T %s -F -q -m 0 -b 4096 %s%s", info->filesystem, (info->filesystem[3]=='2')?"":"-O ^huge_file,extent ", info->device);
+    	sprintf(ext_format, "mke2fs -T %s -F -q -m 0 -b 4096 %s%s", info->filesystem, (info->filesystem[3]=='2')?"":"-O ^huge_file,extent ", info->device);
     	if (__system(ext_format) != 0) {
     		LOGE("format_root_device: Can't run mke2fs [%s]\n", strerror(errno));
     		return -1;

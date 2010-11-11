@@ -573,7 +573,7 @@ int convert_mtd_device(const char *root, const char* fs_list)
     		return -1;
     	}
 
-        ui_show_progress(0.2, 45);
+        ui_show_progress(0.3, root_fsize*30/(140*1024*1024));
 
     	// backup
     	ui_print("Backuping %s...\n", root);
@@ -593,8 +593,8 @@ int convert_mtd_device(const char *root, const char* fs_list)
     	}
 
     	// format $root
+        ui_show_progress(0.05, 10);
         ui_print("Formatting %s...\n", root);
-        ui_show_indeterminate_progress();
         if (0 != format_root_device(root)) {
     		ui_print("Error format %s\n", root);
     		return -1;
@@ -607,7 +607,7 @@ int convert_mtd_device(const char *root, const char* fs_list)
     	}
 
     	// restore $root
-        ui_show_progress(0.8, 500);
+        ui_show_progress(0.65, root_fsize*500/(140*1024*1024));
     	ui_print("Restoring %s...\n", root);
     	if (0 != __system("tar -x -f /sdcard/samdroid/tmp/ctmp.tar")) {
     		ui_print("Can't restore backup file\n");
