@@ -979,9 +979,11 @@ void show_nandroid_menu()
 
 void wipe_battery_stats()
 {
+    ui_print("Wiping battery stats...\n");
     ensure_root_path_mounted("DATA:");
     remove("/data/system/batterystats.bin");
     ensure_root_path_unmounted("DATA:");
+    ui_print("Done.\n");
 }
 
 void show_advanced_menu()
