@@ -897,8 +897,7 @@ void show_nandroid_advanced_restore_menu()
                                 NULL
     };
 
-    static char* list[] = { "Restore boot",
-                            "Restore system",
+    static char* list[] = { "Restore system",
                             "Restore data",
                             "Restore cache",
                             "Restore sd-ext",
@@ -912,22 +911,18 @@ void show_nandroid_advanced_restore_menu()
     switch (chosen_item)
     {
         case 0:
-            if (confirm_selection(confirm_restore, "Yes - Restore boot"))
-                nandroid_restore(file, 1, 0, 0, 0, 0);
-            break;
-        case 1:
             if (confirm_selection(confirm_restore, "Yes - Restore system"))
                 nandroid_restore(file, 0, 1, 0, 0, 0);
             break;
-        case 2:
+        case 1:
             if (confirm_selection(confirm_restore, "Yes - Restore data"))
                 nandroid_restore(file, 0, 0, 1, 0, 0);
             break;
-        case 3:
+        case 2:
             if (confirm_selection(confirm_restore, "Yes - Restore cache"))
                 nandroid_restore(file, 0, 0, 0, 1, 0);
             break;
-        case 4:
+        case 3:
             if (confirm_selection(confirm_restore, "Yes - Restore sd-ext"))
                 nandroid_restore(file, 0, 0, 0, 0, 1);
             break;

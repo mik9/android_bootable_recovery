@@ -263,6 +263,16 @@ const char* get_mount_point_for_root(const char *root_path)
     return info->mount_point;
 }
 
+const char* get_dev_for_root(const char *root_path)
+{
+	const RootInfo *info = get_root_info_for_path(root_path);
+    if (info == NULL || info->device == NULL) {
+        LOGW("get_mount_point_for_root: can't resolve \"%s\"\n", root_path);
+        return NULL;
+    }
+    return info->device;
+}
+
 int detect_internal_fs(const char *root_path)
 {
     RootInfo *info = get_root_info_for_path(root_path);

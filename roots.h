@@ -142,6 +142,7 @@ int detect_internal_fs(const char *root_path);
 const char* get_type_internal_fs(const char *root_path);
 int set_type_internal_fs(const char *root_path, const char* new_fs);
 const char* get_mount_point_for_root(const char *root_path);
+const char* get_dev_for_root(const char *root_path);
 
 typedef struct {
 	const char* filesystem;
