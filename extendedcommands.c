@@ -995,9 +995,9 @@ void show_tarbackup_advanced_restore_menu()
         return;
     }
 
-    static char* advancedheaders[] = {  "Choose an part to backup",
+    static char* advancedheaders[] = {  "Choose a part to backup",
                                 "",
-                                "Choose an part to backup",
+                                "Choose a part to backup",
                                 "first. The next menu will",
                                 "you more options.",
                                 "",
@@ -1107,6 +1107,114 @@ void wipe_battery_stats()
     ui_print("Done.\n");
 }
 
+void dumping_odin_image(const char* root)
+{
+	if (strcmp(get_type_internal_fs(root), "rfs")) {
+		ui_print("You can use this only for RFS filesystem!\n");
+		return -1;
+	}
+
+    struct statfs s;
+    if (0 != statfs("/sdcard", &s))
+        return print_and_error("Unable to stat /sdcard\n");
+    uint64_t bavail = s.f_bavail;
+    uint64_t bsize = s.f_bsize;
+    uint64_t sdcard_free = bavail * bsize;
+    uint64_t sdcard_free_mb = sdcard_free / (uint64_t)(1024 * 1024);
+    ui_print("SD Card space free: %lluMB\n", sdcard_free_mb);
+    if (sdcard_free_mb < 400)
+        ui_print("There may not be enough free space to complete dump... continuing...\n");
+
+	int n_odin_ifile=0;
+	const char* odin_ifile[3] = { "factoryfs.rfs", "datafs.rfs", "cache.rfs" };
+    char backup_path[PATH_MAX], sdev[32], *st;
+	if (!strcmp(root, "DATA:")) n_odin_ifile = 1;
+	else if (!strcmp(root, "CACHE:")) n_odin_ifile = 2;
+
+    char tar_file[PATH_MAX];
+    time_t t = time(NULL);
+    struct tm *tmp = localtime(&t);
+    if (tmp == NULL)
+    {
+        struct timeval tp;
+        gettimeofday(&tp, NULL);
+        sprintf(tar_file, "%d", tp.tv_sec);
+    }
+    else
+    {
+        strftime(tar_file, sizeof(tar_file), "%F.%H.%M.%S", tmp);
+    }
+
+	ensure_root_path_unmounted(root);
+
+    if (ensure_root_path_mounted("SDCARD:") != 0) {
+        LOGE ("Can't mount /sdcard\n");
+        return;
+    }
+
+    if (0 != __system("mkdir -p /sdcard/samdroid/odin/tmp")) {
+		ui_print("Can't create tmp folder for backup\n");
+		return -1;
+	}
+
+    strcpy(sdev, get_dev_for_root(root));
+    if (st = strstr(sdev, "stl")) {
+    	memcpy(st, "bml", 3);
+    }
+    else {
+    	ui_print("Mistake in device name %s\n", sdev);
+    	return -1;
+    }
+
+    ui_print("Dumping %s..\n", root);
+    sprintf(backup_path, "fdump -t %s /sdcard/samdroid/odin/tmp/%s", sdev, odin_ifile[n_odin_ifile]);
+    if (0 != __system(backup_path)) {
+		ui_print("Can't create odin image [%s]\n", odin_ifile[n_odin_ifile]);
+		return -1;
+	}
+
+    sprintf(backup_path, "cd /sdcard/samdroid/odin/tmp && tar -cf ../%s.tar %s", tar_file, odin_ifile[n_odin_ifile]);
+    if (0 != __system(backup_path)) {
+		ui_print("Can't create odin image [%s]\n", odin_ifile[n_odin_ifile]);
+		return -1;
+	}
+
+    __system("rm -r /sdcard/samdroid/odin/tmp");
+
+    ui_print("Done\n");
+}
+
+void dump_odin_image()
+{
+    static char* headers[] = {  "Dump image for Odin",
+                                "",
+                                NULL
+    };
+
+    static char* list[] = { "System partition",
+                            "Data partition",
+                            "Cache partition",
+                            NULL
+    };
+
+
+    static char* confirm_restore  = "Confirm dump?";
+
+    int chosen_item = get_menu_selection(headers, list, 0);
+    switch (chosen_item)
+    {
+		case 0:
+			dumping_odin_image("SYSTEM:");
+			break;
+		case 1:
+			dumping_odin_image("DATA:");
+			break;
+		case 2:
+			dumping_odin_image("CACHE:");
+			break;
+    }
+}
+
 void show_advanced_menu()
 {
     static char* headers[] = {  "Advanced and Debugging Menu",
@@ -1123,6 +1231,7 @@ void show_advanced_menu()
                             "Partition SD Card",
                             "Fix Permissions",
 #endif
+                            "Create image for Odin",
                             NULL
     };
 
@@ -1224,6 +1333,12 @@ void show_advanced_menu()
                 __system("fix_permissions");
                 ui_print("Done!\n");
                 break;
+            }
+            case 7:
+            {
+            	// create image for Odin
+            	dump_odin_image();
+            	break;
             }
         }
     }
