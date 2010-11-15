@@ -522,6 +522,9 @@ prompt_and_wait() {
             case ITEM_NANDROID:
                 show_nandroid_menu();
                 break;
+            case ITEM_TARBACKUP:
+            	show_tarbackup_menu();
+            	break;
             case ITEM_PARTITION:
                 show_partition_menu();
                 break;

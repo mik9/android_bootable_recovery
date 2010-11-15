@@ -872,7 +872,7 @@ int amend_main(int argc, char** argv)
     return run_script(argv[1]);
 }
 
-void show_nandroid_advanced_restore_menu()
+void show_nandroid_advanced_restore_menu(int f_nandroid)
 {
     if (ensure_root_path_mounted("SDCARD:") != 0) {
         LOGE ("Can't mount /sdcard\n");
@@ -888,7 +888,7 @@ void show_nandroid_advanced_restore_menu()
                                 NULL
     };
 
-    char* file = choose_file_menu("/sdcard/clockworkmod/backup/", NULL, advancedheaders);
+    char* file = choose_file_menu(f_nandroid?"/sdcard/clockworkmod/backup/":"/sdcard/samdroid/backup/", NULL, advancedheaders);
     if (file == NULL)
         return;
 
@@ -900,7 +900,7 @@ void show_nandroid_advanced_restore_menu()
     static char* list[] = { "Restore system",
                             "Restore data",
                             "Restore cache",
-                            "Restore sd-ext",
+                            //"Restore sd-ext",
                             NULL
     };
 
@@ -911,20 +911,36 @@ void show_nandroid_advanced_restore_menu()
     switch (chosen_item)
     {
         case 0:
-            if (confirm_selection(confirm_restore, "Yes - Restore system"))
-                nandroid_restore(file, 0, 1, 0, 0, 0);
+            if (confirm_selection(confirm_restore, "Yes - Restore system")) {
+                if (f_nandroid)
+                	nandroid_restore(file, 0, 1, 0, 0, 0);
+                else
+                	tarbackup_restore(file, 1, 0, 0, 0);
+            }
             break;
         case 1:
-            if (confirm_selection(confirm_restore, "Yes - Restore data"))
-                nandroid_restore(file, 0, 0, 1, 0, 0);
+            if (confirm_selection(confirm_restore, "Yes - Restore data")) {
+                if (f_nandroid)
+                	nandroid_restore(file, 0, 0, 1, 0, 0);
+                else
+                	tarbackup_restore(file, 0, 1, 0, 0);
+            }
             break;
         case 2:
-            if (confirm_selection(confirm_restore, "Yes - Restore cache"))
-                nandroid_restore(file, 0, 0, 0, 1, 0);
+            if (confirm_selection(confirm_restore, "Yes - Restore cache")) {
+                if (f_nandroid)
+                	nandroid_restore(file, 0, 0, 0, 1, 0);
+                else
+                	tarbackup_restore(file, 0, 0, 1, 0);
+            }
             break;
         case 3:
-            if (confirm_selection(confirm_restore, "Yes - Restore sd-ext"))
-                nandroid_restore(file, 0, 0, 0, 0, 1);
+            if (confirm_selection(confirm_restore, "Yes - Restore sd-ext")) {
+                if (f_nandroid)
+                	nandroid_restore(file, 0, 0, 0, 0, 1);
+                else
+                	tarbackup_restore(file, 0, 0, 0, 1);
+            }
             break;
     }
 }
@@ -967,7 +983,117 @@ void show_nandroid_menu()
             show_nandroid_restore_menu();
             break;
         case 2:
-            show_nandroid_advanced_restore_menu();
+            show_nandroid_advanced_restore_menu(1);
+            break;
+    }
+}
+
+void show_tarbackup_advanced_restore_menu()
+{
+    if (ensure_root_path_mounted("SDCARD:") != 0) {
+        LOGE ("Can't mount /sdcard\n");
+        return;
+    }
+
+    static char* advancedheaders[] = {  "Choose an part to backup",
+                                "",
+                                "Choose an part to backup",
+                                "first. The next menu will",
+                                "you more options.",
+                                "",
+                                NULL
+    };
+
+    static char* headers[] = {  "Advanced TAR backup",
+                                "",
+                                NULL
+    };
+
+    static char* list[] = { "Backup system",
+                            "Backup data",
+                            "Backup cache",
+                            //"Backup sd-ext",
+                            NULL
+    };
+
+
+    static char* confirm_restore  = "Confirm backup?";
+
+    char backup_path[PATH_MAX];
+    time_t t = time(NULL);
+    struct tm *tmp = localtime(&t);
+    if (tmp == NULL)
+    {
+        struct timeval tp;
+        gettimeofday(&tp, NULL);
+        sprintf(backup_path, "/sdcard/samdroid/backup/%d", tp.tv_sec);
+    }
+    else
+    {
+        strftime(backup_path, sizeof(backup_path), "/sdcard/samdroid/backup/%F.%H.%M.%S", tmp);
+    }
+
+    int chosen_item = get_menu_selection(headers, list, 0);
+    switch (chosen_item)
+    {
+        case 0:
+            if (confirm_selection(confirm_restore, "Yes - Backup system"))
+            	tarbackup_backup(backup_path, 1, 0, 0, 0);
+            break;
+        case 1:
+            if (confirm_selection(confirm_restore, "Yes - Backup data"))
+            	tarbackup_backup(backup_path, 0, 1, 0, 0);
+            break;
+        case 2:
+            if (confirm_selection(confirm_restore, "Yes - Backup cache"))
+            	tarbackup_backup(backup_path, 0, 0, 1, 0);
+            break;
+        case 3:
+            if (confirm_selection(confirm_restore, "Yes - Backup sd-ext"))
+            	tarbackup_backup(backup_path, 0, 0, 0, 1);
+            break;
+    }
+}
+
+void show_tarbackup_menu()
+{
+    static char* headers[] = {  "TAR backup",
+                                "",
+                                NULL
+    };
+
+    static char* list[] = { "Backup",
+    						"Advanced Backup",
+                            "Advanced Restore",
+                            NULL
+    };
+
+    int chosen_item = get_menu_selection(headers, list, 0);
+    switch (chosen_item)
+    {
+        case 0:
+            {
+                char backup_path[PATH_MAX];
+                time_t t = time(NULL);
+                struct tm *tmp = localtime(&t);
+                if (tmp == NULL)
+                {
+                    struct timeval tp;
+                    gettimeofday(&tp, NULL);
+                    sprintf(backup_path, "/sdcard/samdroid/backup/%d", tp.tv_sec);
+                }
+                else
+                {
+                    strftime(backup_path, sizeof(backup_path), "/sdcard/samdroid/backup/%F.%H.%M.%S", tmp);
+                }
+                tarbackup_backup(backup_path, 1, 1, 1, 1);
+            }
+            break;
+        case 1:
+        	show_tarbackup_advanced_restore_menu();
+        	break;
+        case 2:
+            show_nandroid_advanced_restore_menu(0);
             break;
     }
 }

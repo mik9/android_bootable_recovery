@@ -6,4 +6,6 @@ int nandroid_backup(const char* backup_path);
 int nandroid_restore(const char* backup_path, int restore_boot, int restore_system, int restore_data, int restore_cache, int restore_sdext);
 void nandroid_generate_timestamp_path(char* backup_path);
 
+int tarbackup_backup(const char* backup_path, int backup_system, int backup_data, int backup_cache, int backup_android_secure);
+
 #endif

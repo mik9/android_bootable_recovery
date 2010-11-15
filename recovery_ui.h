@@ -71,8 +71,9 @@ int device_wipe_data();
 #define ITEM_WIPE_DATA       2
 #define ITEM_WIPE_CACHE      3
 #define ITEM_NANDROID        4
-#define ITEM_PARTITION       5
-#define ITEM_ADVANCED        6
+#define ITEM_TARBACKUP		 5
+#define ITEM_PARTITION       6
+#define ITEM_ADVANCED        7
 
 // removed items
 #define ITEM_APPLY_SDCARD    900
