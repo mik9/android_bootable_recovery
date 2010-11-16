@@ -1225,6 +1225,7 @@ void show_advanced_menu()
     static char* list[] = { "Reboot Recovery",
                             "Wipe Dalvik Cache",
                             "Wipe Battery Stats",
+                            "Wipe SamdroidTools script",
                             "Report Error",
                             "Key Test",
 #ifndef BOARD_HAS_SMALL_RECOVERY
@@ -1267,9 +1268,16 @@ void show_advanced_menu()
                 break;
             }
             case 3:
+                ui_print("Wiping SamdroidTools script...\n");
+                ensure_root_path_mounted("DATA:");
+                remove("/data/samdroidtools.sh");
+                ensure_root_path_unmounted("DATA:");
+                ui_print("Done.\n");
+            	break;
+            case 4:
                 handle_failure(1);
                 break;
-            case 4:
+            case 5:
             {
                 ui_print("Outputting key codes.\n");
                 ui_print("Go back to end debugging.\n");
@@ -1284,7 +1292,7 @@ void show_advanced_menu()
                 while (action != GO_BACK);
                 break;
             }
-            case 5:
+            case 6:
             {
                 static char* ext_sizes[] = { "128M",
                                              "256M",
@@ -1325,7 +1333,7 @@ void show_advanced_menu()
                     ui_print("An error occured while partitioning your SD Card. Please see /tmp/recovery.log for more details.\n");
                 break;
             }
-            case 6:
+            case 7:
             {
                 ensure_root_path_mounted("SYSTEM:");
                 ensure_root_path_mounted("DATA:");
@@ -1334,7 +1342,7 @@ void show_advanced_menu()
                 ui_print("Done!\n");
                 break;
             }
-            case 7:
+            case 8:
             {
             	// create image for Odin
             	dump_odin_image();
