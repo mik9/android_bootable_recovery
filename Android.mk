@@ -44,7 +44,7 @@ LOCAL_MODULE := recovery
 
 LOCAL_FORCE_STATIC_EXECUTABLE := true
 
-RECOVERY_VERSION := Samdroid.Net Recovery v0.1.3.b5
+RECOVERY_VERSION := Samdroid.Net Recovery v0.1.3.b6
 RECOVERY_AUTHOR := LeshaK / Xmister & Samdroid.Net
 BASE_RECOVERY_VERSION := based on ClockworkMod v2.5.1.1
 
