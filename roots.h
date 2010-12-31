@@ -38,7 +38,7 @@
 #endif
 
 #ifndef DATA_DEVICE
-#define DATA_DEVICE "/dev/stl5"
+#define DATA_DEVICE "/dev/stl6"
 #endif
 
 #ifndef DATA_FILESYSTEM
@@ -62,7 +62,7 @@
 #endif
 
 #ifndef SYSTEM_DEVICE
-#define SYSTEM_DEVICE "/dev/stl6"
+#define SYSTEM_DEVICE "/dev/stl5"
 #endif
 
 #ifndef SYSTEM_FILESYSTEM

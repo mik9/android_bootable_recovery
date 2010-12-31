@@ -1,3 +1,4 @@
+LOCAL_MODULE_TAGS := optional
 ifeq ($(BOARD_USES_BMLUTILS),true)
 
 LOCAL_PATH := $(call my-dir)

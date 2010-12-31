@@ -7,6 +7,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
 	mmcutils.c
 
+LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := libmmcutils
 
 include $(BUILD_STATIC_LIBRARY)

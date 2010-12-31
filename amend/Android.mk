@@ -35,6 +35,7 @@ LOCAL_SRC_FILES := \
 
 LOCAL_CFLAGS := $(amend_cflags) -g -O0
 LOCAL_MODULE := amend
+LOCAL_MODULE_TAGS := optional
 LOCAL_YACCFLAGS := -v
 
 include $(BUILD_HOST_EXECUTABLE)
@@ -49,5 +50,5 @@ LOCAL_SRC_FILES += $(amend_test_files)
 
 LOCAL_CFLAGS := $(amend_cflags)
 LOCAL_MODULE := libamend
-
+LOCAL_MODULE_TAGS := optional
 include $(BUILD_STATIC_LIBRARY)

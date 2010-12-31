@@ -1,3 +1,4 @@
+LOCAL_MODULE_TAGS := optional
 # Copyright 2009 The Android Open Source Project
 
 LOCAL_PATH := $(call my-dir)
